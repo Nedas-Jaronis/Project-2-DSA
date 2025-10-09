@@ -23,7 +23,7 @@ const SkillRadar: React.FC<SkillRadarProps> = ({ data }) => {
       <RadarChart
         cx="50%"
         cy="50%"
-        outerRadius="80%"
+        outerRadius="70%"
         data={data}
       >
         <PolarGrid gridType="circle" />

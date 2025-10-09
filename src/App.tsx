@@ -3,11 +3,14 @@ import './App.css';
 import SkillRadar from './skillRadarChart';
 
 const sampleData = [
-  { subject: 'Danceability', value: 80 },
-  { subject: 'Valence', value: 65 },
-  { subject: 'Energy', value: 100 },
-  { subject: 'Agility', value: 200 },
-  { subject: 'Intelligence', value: 100 },
+  { "subject": "Danceability", "value": 80 },
+  { "subject": "Valence", "value": 65 },
+  { "subject": "Energy", "value": 100 },
+  { "subject": "Tempo", "value": 120 },
+  { "subject": "Acousticness", "value": 30 },
+  { "subject": "Instrumentalness", "value": 10 },
+  { "subject": "Speechiness", "value": 5 },
+  { "subject": "Loudness", "value": -5 }
 ];
 
 function App() {

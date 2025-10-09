@@ -92,12 +92,11 @@ html, body {
   transform: translate(-50%, -50%);
   width: 40vw;
   height: 40vw;
-  max-width: 400px;
-  max-height: 400px;
+  max-width: 700px;
+  max-height: 700px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 3px solid black;
   border-radius: 50%;
   background-color: transparent;
 }
@@ -141,6 +140,17 @@ html, body {
 .AddSongs::-webkit-scrollbar-corner,
 .RecommendSongs::-webkit-scrollbar-corner {
   background-color: transparent;
+}
+
+/* Target Recharts chart SVG elements / wrappers to remove focus outlines */
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible,
+.radar-chart *:focus,
+.radar-chart *:focus-visible,
+.ChartContainer *,
+.Chart * {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 
