@@ -12,16 +12,28 @@ const sampleData = [
 
 function App() {
   const [activeButton, setActiveButton] = useState<'BFS' | 'DFS'>('BFS');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const handleToggle = (button: 'BFS' | 'DFS') => {
     setActiveButton(button);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+
   };
 
   return (
     <div className="PageContainer">
       <div className="headerContainer">
         <div className="Header">
-          <h1 id="search">Search</h1>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="SearchInput"
+          />
         </div>
       </div>
 

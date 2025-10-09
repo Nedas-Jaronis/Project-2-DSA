@@ -29,10 +29,24 @@ html, body {
   border: 3px solid black;
   width: 50vw;
   border-radius: 25px;
-  text-align: center;
-  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: transparent;
+  padding: 5px; 
 }
+
+
+.SearchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 80%;
+  text-align: center;
+  padding: 4px 0;
+}
+
+
 
 /* Main Content */
 .mainContent {
@@ -98,6 +112,20 @@ html, body {
   text-align: center;
   background-color: transparent;
 }
+
+.ChartContainer:active,
+.Chart:active {
+  outline: none;
+  box-shadow: none;
+}
+.ChartContainer:focus,
+.ChartContainer:focus-visible,
+.Chart:focus,
+.Chart:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 
 
 
