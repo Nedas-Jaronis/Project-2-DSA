@@ -1,0 +1,149 @@
+/* Global Styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+
+.PageContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: transparent;
+  padding-top: 3vh;
+}
+
+
+.headerContainer {
+  flex: 0 0 10vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Header {
+  border: 3px solid black;
+  width: 50vw;
+  border-radius: 25px;
+  text-align: center;
+  padding: 10px;
+  background-color: transparent;
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 20px;
+  padding: 10px 20px;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+/* Left and Right Containers */
+.LeftAddContainer, .RightRecommendContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20vw;
+  max-width: 280px;
+  height: 90%;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+
+.AddSongs, .RecommendSongs {
+  border: 3px solid black;
+  padding: 10px;
+  text-align: center;
+  flex: 1;
+  overflow-y: auto;
+  border-radius: 70px;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+
+.ChartContainer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40vw;
+  height: 40vw;
+  max-width: 400px;
+  max-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid black;
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+.Chart {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: transparent;
+}
+
+
+
+.AddSongs::-webkit-scrollbar, .RecommendSongs::-webkit-scrollbar {
+  width: 4px;
+  background: transparent;
+}
+
+.AddSongs::-webkit-scrollbar-thumb, .RecommendSongs::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.AddSongs::-webkit-scrollbar-corner,
+.RecommendSongs::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+
+
+.toggle {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background-color: transparent;
+  padding: 20px 0;
+  z-index: 100;
+}
+
+.BFS, .DFS {
+  flex: 0 0 100px;
+  padding: 10px 0;
+  border: 3px solid black;
+  border-radius: 25px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  background-color: transparent;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.BFS.active, .DFS.active {
+  background-color: black;
+  color: white;
+}
