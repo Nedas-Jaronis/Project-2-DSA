@@ -3,11 +3,11 @@ import './App.css';
 import SkillRadar from './skillRadarChart';
 
 const sampleData = [
-  { subject: 'Speed', value: 80 },
-  { subject: 'Strength', value: 65 },
-  { subject: 'Endurance', value: 90 },
-  { subject: 'Agility', value: 70 },
-  { subject: 'Intelligence', value: 50 },
+  { subject: 'Danceability', value: 80 },
+  { subject: 'Valence', value: 65 },
+  { subject: 'Energy', value: 100 },
+  { subject: 'Agility', value: 200 },
+  { subject: 'Intelligence', value: 100 },
 ];
 
 function App() {
@@ -30,6 +30,7 @@ function App() {
           <div className="AddSongs">
             <h1>song1</h1>
             <h1>song2</h1>
+            
           </div>
         </div>
 
