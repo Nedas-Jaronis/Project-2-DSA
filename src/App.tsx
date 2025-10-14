@@ -22,7 +22,7 @@ function App() {
     fetch('http://localhost:5000/reset', { method: 'POST' })
       .then(() => console.log('Backend reset on page load'))
       .catch(err => console.error('Failed to reset backend:', err));
-  }, []); // empty dependency array → runs once when page loads
+  }, []);
 
 
   const handleToggle = (button: 'BFS' | 'DFS') => {
@@ -68,7 +68,7 @@ function App() {
             placeholder="Search..."
             value={searchQuery}
             onChange={handleSearchChange}
-            onKeyDown={handleKeyPress} // ✅ Add this line
+            onKeyDown={handleKeyPress}
             className="SearchInput"
           />
         </div>
