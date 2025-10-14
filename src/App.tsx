@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import SkillRadar from './skillRadarChart';
 
@@ -17,6 +17,13 @@ function App() {
   const [activeButton, setActiveButton] = useState<'BFS' | 'DFS'>('BFS');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [addedSongs, setAddedSongs] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/reset', { method: 'POST' })
+      .then(() => console.log('Backend reset on page load'))
+      .catch(err => console.error('Failed to reset backend:', err));
+  }, []); // empty dependency array → runs once when page loads
+
 
   const handleToggle = (button: 'BFS' | 'DFS') => {
     setActiveButton(button);
