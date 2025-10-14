@@ -3,19 +3,20 @@ import './App.css';
 import SkillRadar from './skillRadarChart';
 
 const sampleData = [
-  { "subject": "Danceability", "value": 80 },
-  { "subject": "Valence", "value": 65 },
-  { "subject": "Energy", "value": 100 },
-  { "subject": "Tempo", "value": 120 },
-  { "subject": "Acousticness", "value": 30 },
-  { "subject": "Instrumentalness", "value": 10 },
-  { "subject": "Speechiness", "value": 5 },
-  { "subject": "Loudness", "value": -5 }
+  { subject: "Danceability", value: 80 },
+  { subject: "Valence", value: 65 },
+  { subject: "Energy", value: 100 },
+  { subject: "Tempo", value: 120 },
+  { subject: "Acousticness", value: 30 },
+  { subject: "Instrumentalness", value: 10 },
+  { subject: "Speechiness", value: 5 },
+  { subject: "Loudness", value: -5 },
 ];
 
 function App() {
   const [activeButton, setActiveButton] = useState<'BFS' | 'DFS'>('BFS');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [addedSongs, setAddedSongs] = useState<string[]>([]); // ✅ Track added songs
 
   const handleToggle = (button: 'BFS' | 'DFS') => {
     setActiveButton(button);
@@ -23,7 +24,13 @@ function App() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim() !== '') {
+      setAddedSongs([...addedSongs, searchQuery.trim()]);
+      setSearchQuery('');
+    }
   };
 
   return (
@@ -35,6 +42,7 @@ function App() {
             placeholder="Search..."
             value={searchQuery}
             onChange={handleSearchChange}
+            onKeyDown={handleKeyPress} // ✅ Add this line
             className="SearchInput"
           />
         </div>
@@ -43,9 +51,10 @@ function App() {
       <div className="mainContent">
         <div className="LeftAddContainer">
           <div className="AddSongs">
-            <h1>song1</h1>
-            <h1>song2</h1>
-            
+            <h2>Added Songs</h2>
+            {addedSongs.map((song, index) => (
+              <h3 key={index}>{song}</h3> // ✅ Show added songs
+            ))}
           </div>
         </div>
 
