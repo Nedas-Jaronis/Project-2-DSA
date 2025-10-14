@@ -16,7 +16,7 @@ const sampleData = [
 function App() {
   const [activeButton, setActiveButton] = useState<'BFS' | 'DFS'>('BFS');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [addedSongs, setAddedSongs] = useState<string[]>([]); // ✅ Track added songs
+  const [addedSongs, setAddedSongs] = useState<string[]>([]);
 
   const handleToggle = (button: 'BFS' | 'DFS') => {
     setActiveButton(button);
