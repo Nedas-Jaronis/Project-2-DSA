@@ -28,6 +28,7 @@ html, body {
 .Header {
   border: 3px solid black;
   width: 50vw;
+  height: 8vh;
   border-radius: 25px;
   display: flex;
   justify-content: center;
@@ -41,9 +42,10 @@ html, body {
   border: none;
   background: transparent;
   outline: none;
-  width: 80%;
+  width: 100%;
   text-align: center;
   padding: 4px 0;
+  font-size: 30px;
 }
 
 
