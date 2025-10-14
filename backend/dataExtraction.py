@@ -23,3 +23,7 @@ df = pd.read_csv(csv_file)
 
 # Show the first few rows
 print(df.head())
+
+
+# All Columns of data
+# ['id', 'name', 'popularity', 'duration_ms', 'explicit', 'artists', 'id_artists', 'release_date', 'danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature']
