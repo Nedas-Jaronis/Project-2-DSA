@@ -2,28 +2,20 @@ import kagglehub
 import pandas as pd
 import os
 
-# Download the dataset
+# Download dataset
 path = kagglehub.dataset_download(
     "yamaerenay/spotify-dataset-19212020-600k-tracks")
-
-# Show the path to see what was downloaded
-print("Dataset downloaded to:", path)
-
-# List all files in the downloaded path
-for root, dirs, files in os.walk(path):
-    for file in files:
-        print("Found file:", file)
-
-# Load a CSV file (replace the filename with the correct one you find above)
-# Adjust this if the file has a different name
 csv_file = os.path.join(path, "tracks.csv")
 
-# Load the CSV into pandas
+# Load full CSV
 df = pd.read_csv(csv_file)
 
-# Show the first few rows
-print(df.head())
+# Extract only the song names column and remove duplicates/nulls
+song_names = df["name"].dropna().drop_duplicates()
 
+# Save to a smaller CSV for your backend
+output_path = "data/song_names.csv"
+os.makedirs("data", exist_ok=True)
+song_names.to_csv(output_path, index=False, header=["name"])
 
-# All Columns of data
-# ['id', 'name', 'popularity', 'duration_ms', 'explicit', 'artists', 'id_artists', 'release_date', 'danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature']
+print(f"✅ Saved {len(song_names)} unique song names to {output_path}")
