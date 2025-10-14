@@ -17,13 +17,33 @@ function App() {
   const [activeButton, setActiveButton] = useState<'BFS' | 'DFS'>('BFS');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [addedSongs, setAddedSongs] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
+  // ✅ Reset backend on page load
   useEffect(() => {
     fetch('http://localhost:5000/reset', { method: 'POST' })
       .then(() => console.log('Backend reset on page load'))
       .catch(err => console.error('Failed to reset backend:', err));
   }, []);
 
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const fetchSuggestions = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/suggestions?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        setSuggestions(data);
+      } catch (err) {
+        console.error('Error fetching suggestions:', err);
+      }
+    };
+
+    fetchSuggestions();
+  }, [searchQuery]);
 
   const handleToggle = (button: 'BFS' | 'DFS') => {
     setActiveButton(button);
@@ -33,43 +53,48 @@ function App() {
     setSearchQuery(e.target.value);
   };
 
+  const handleSuggestionClick = (song: string) => {
+    setSearchQuery(song);
+    setSuggestions([]);
+  };
+
   const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (e.key === 'Enter' && searchQuery.trim() !== '') {
-    const song = searchQuery.trim();
+    if (e.key === 'Enter' && searchQuery.trim() !== '') {
+      const song = searchQuery.trim();
 
-    try {
-      const res = await fetch('http://localhost:5000/api/add-song', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ song }),
-      });
+      try {
+        const res = await fetch('http://localhost:5000/api/add-song', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ song }),
+        });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        alert(errorData.error || 'Failed to add song');
-        return;
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.error || 'Failed to add song');
+
+          setSearchQuery('')
+          setSuggestions([])
+          return;
+        }
+
+        const data = await res.json();
+        console.log('Backend now has:', data.addedSongs);
+
+        setAddedSongs(data.addedSongs);
+        setSearchQuery('');
+        setSuggestions([]);
+      } catch (err) {
+        console.error('❌ Error sending to backend:', err);
+        alert('Error connecting to backend');
       }
-
-      const data = await res.json();
-      console.log('Backend now has:', data.addedSongs);
-
-      // ✅ Update frontend only after backend success
-      setAddedSongs(data.addedSongs);
-      setSearchQuery(''); // clear input
-
-    } catch (err) {
-      console.error('❌ Error sending to backend:', err);
-      alert('Error connecting to backend');
     }
-  }
-};
-
-
+  };
 
   return (
     <div className="PageContainer">
       <div className="headerContainer">
-        <div className="Header">
+        <div className="Header" style={{ position: 'relative' }}>
           <input
             type="text"
             placeholder="Search..."
@@ -77,7 +102,17 @@ function App() {
             onChange={handleSearchChange}
             onKeyDown={handleKeyPress}
             className="SearchInput"
+            autoComplete="off"
           />
+          {suggestions.length > 0 && (
+            <ul className="SuggestionsDropdown">
+              {suggestions.map((s, i) => (
+                <li key={i} onClick={() => handleSuggestionClick(s)}>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Load the song names from your pre-saved CSV
+
 let validSongs = new Set();
 
 fs.createReadStream("data/song_names.csv")
@@ -19,10 +19,10 @@ fs.createReadStream("data/song_names.csv")
     console.log(`✅ Loaded ${validSongs.size} songs from dataset`);
   });
 
-// In-memory store of added songs
+
 let addedSongs = [];
 
-// Add song endpoint
+
 app.post("/api/add-song", (req, res) => {
   const { song } = req.body;
   if (!song) return res.status(400).json({ error: "Song is required" });
@@ -38,7 +38,20 @@ app.post("/api/add-song", (req, res) => {
 // Get added songs
 app.get("/api/songs", (req, res) => res.json(addedSongs));
 
-// Reset endpoint
+app.get("/api/suggestions", (req, res) => {
+  const query = req.query.q?.toLowerCase() || "";
+  if (!query) return res.json([]);
+
+  const matches = Array.from(validSongs)
+    .filter(
+      (name) =>
+        name.startsWith(query) && name.toLowerCase() !== query
+    )
+    .slice(0, 10);
+
+  res.json(matches);
+});
+
 app.post("/reset", (req, res) => {
   addedSongs = [];
   res.json({ message: "Songs cleared" });
