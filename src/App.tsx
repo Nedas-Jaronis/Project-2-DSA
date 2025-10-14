@@ -26,12 +26,31 @@ function App() {
     setSearchQuery(e.target.value);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
-      setAddedSongs([...addedSongs, searchQuery.trim()]);
+      const song = searchQuery.trim();
+
+      // Add locally
+      setAddedSongs([...addedSongs, song]);
       setSearchQuery('');
+
+      // ✅ Send to backend
+      try {
+        const res = await fetch('http://localhost:5000/api/add-song', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ song }),
+        });
+
+        if (!res.ok) throw new Error('Failed to send to backend');
+        const data = await res.json();
+        console.log('Backend now has:', data.addedSongs);
+      } catch (err) {
+        console.error('❌ Error sending to backend:', err);
+      }
     }
   };
+
 
   return (
     <div className="PageContainer">
@@ -53,7 +72,7 @@ function App() {
           <div className="AddSongs">
             <h2>Added Songs</h2>
             {addedSongs.map((song, index) => (
-              <h3 key={index}>{song}</h3> // ✅ Show added songs
+              <h3 key={index}>{song}</h3>
             ))}
           </div>
         </div>
