@@ -157,13 +157,15 @@ function App() {
               ))}
             </ul>
           )}
-          
-           {errorMessage && (
-            <div className="ErrorPopup">
-              {errorMessage}
-              <button onClick={() => setErrorMessage('')} className="CloseBtn">X</button>
-            </div>
-          )}
+
+{errorMessage && (
+  <div className="ErrorPopup">
+    <img src="/src/spiderman-electro.png" alt="Error" className="ErrorIcon" />
+    <span>{errorMessage}</span>
+    <button onClick={() => setErrorMessage('')} className="CloseBtn">X</button>
+  </div>
+)}
+
         </div>
       </div>
 
