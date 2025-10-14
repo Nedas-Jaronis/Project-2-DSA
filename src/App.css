@@ -236,7 +236,7 @@ html, body {
 
 .ErrorPopup {
   position: absolute;
-  top: 50px;          /* adjust as needed */
+  top: 250px;          /* adjust as needed */
   left: 50%;          /* center horizontally */
   transform: translateX(-50%); /* center precisely */
   width: 300px;       /* bigger width */
@@ -247,13 +247,13 @@ html, body {
   display: flex;
   justify-content: center; /* center content horizontally */
   align-items: center;     /* center content vertically */
-  z-index: 50;             /* make sure it’s on top */
   padding: 0;              /* remove inner spacing */
 }
 
 .ErrorIcon {
-  width: 200px;  /* huge icon */
-  height: 200px;
+  width: 1000px;  /* huge icon */
+  height: 1000px;
+  z-index: 1000000;
 }
 
 .CloseBtn {
