@@ -34,29 +34,36 @@ function App() {
   };
 
   const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim() !== '') {
-      const song = searchQuery.trim();
+  if (e.key === 'Enter' && searchQuery.trim() !== '') {
+    const song = searchQuery.trim();
 
-      // Add locally
-      setAddedSongs([...addedSongs, song]);
-      setSearchQuery('');
+    try {
+      const res = await fetch('http://localhost:5000/api/add-song', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ song }),
+      });
 
-      // ✅ Send to backend
-      try {
-        const res = await fetch('http://localhost:5000/api/add-song', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ song }),
-        });
-
-        if (!res.ok) throw new Error('Failed to send to backend');
-        const data = await res.json();
-        console.log('Backend now has:', data.addedSongs);
-      } catch (err) {
-        console.error('❌ Error sending to backend:', err);
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || 'Failed to add song');
+        return;
       }
+
+      const data = await res.json();
+      console.log('Backend now has:', data.addedSongs);
+
+      // ✅ Update frontend only after backend success
+      setAddedSongs(data.addedSongs);
+      setSearchQuery(''); // clear input
+
+    } catch (err) {
+      console.error('❌ Error sending to backend:', err);
+      alert('Error connecting to backend');
     }
-  };
+  }
+};
+
 
 
   return (
