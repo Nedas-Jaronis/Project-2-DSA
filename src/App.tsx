@@ -18,6 +18,47 @@ function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [addedSongs, setAddedSongs] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+
+  const handleToggleSong = (song: string) => {
+    const newSelected = new Set(selectedSongs);
+    if (newSelected.has(song)) {
+      newSelected.delete(song);
+    } else {
+      newSelected.add(song);
+    }
+    setSelectedSongs(newSelected);
+  };
+  //Function to handle the selection delete functionality
+  const handleDeleteSelected = async () => {
+    const songsToDelete = Array.from(selectedSongs);
+    if (songsToDelete.length === 0) return;
+
+    try {
+      const res = await fetch("http://localhost:5000/api/delete-songs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ songs: songsToDelete }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to delete songs");
+        return;
+      }
+
+      const data = await res.json();
+      setAddedSongs(data.addedSongs);
+      setSelectedSongs(new Set());
+    } catch (err) {
+      console.error("❌ Error deleting songs from backend:", err);
+      alert("Error connecting to backend");
+    }
+  };
+
+
 
   // ✅ Reset backend on page load
   useEffect(() => {
@@ -71,7 +112,10 @@ function App() {
 
         if (!res.ok) {
           const errorData = await res.json();
-          alert(errorData.error || 'Failed to add song');
+          setErrorMessage(errorData.error || 'Failed to add song');
+
+          setTimeout(() => setErrorMessage(''), 3000);
+
 
           setSearchQuery('')
           setSuggestions([])
@@ -113,18 +157,58 @@ function App() {
               ))}
             </ul>
           )}
+          
+           {errorMessage && (
+            <div className="ErrorPopup">
+              {errorMessage}
+              <button onClick={() => setErrorMessage('')} className="CloseBtn">X</button>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="mainContent">
         <div className="LeftAddContainer">
-          <div className="AddSongs">
-            <h2>Added Songs</h2>
-            {addedSongs.map((song, index) => (
-              <h3 key={index}>{song}</h3>
-            ))}
-          </div>
-        </div>
+  <div className="AddSongs">
+    <h2>Playlist</h2>
+    {addedSongs.map((song, index) => (
+      <div
+        key={index}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '4px',
+        }}
+      >
+        <span>{song}</span>
+        <input
+          type="checkbox"
+          checked={selectedSongs.has(song)}
+          onChange={() => handleToggleSong(song)}
+        />
+      </div>
+    ))}
+
+    {addedSongs.length > 0 && (
+      <button
+        onClick={handleDeleteSelected}
+        style={{
+          marginTop: '10px',
+          padding: '6px 12px',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          backgroundColor: '#e74c3c',
+          color: 'white',
+          border: 'none',
+        }}
+      >
+        Delete Selected
+      </button>
+    )}
+  </div>
+</div>
+
 
         <div className="ChartContainer">
           <div className="Chart">

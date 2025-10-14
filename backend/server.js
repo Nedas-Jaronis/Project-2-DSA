@@ -38,6 +38,7 @@ app.post("/api/add-song", (req, res) => {
 // Get added songs
 app.get("/api/songs", (req, res) => res.json(addedSongs));
 
+//Used for the suggestions
 app.get("/api/suggestions", (req, res) => {
   const query = req.query.q?.toLowerCase() || "";
   if (!query) return res.json([]);
@@ -56,5 +57,15 @@ app.post("/reset", (req, res) => {
   addedSongs = [];
   res.json({ message: "Songs cleared" });
 });
+
+//This will delete multiple songs at once, this is used for the selection delete
+app.post("/api/delete-songs", (req, res) => {
+  const { songs } = req.body;
+  if (!Array.isArray(songs)) return res.status(400).json({ error: "Songs array is required" });
+
+  addedSongs = addedSongs.filter((song) => !songs.includes(song));
+  res.json({ success: true, addedSongs });
+});
+
 
 app.listen(5000, () => console.log("✅ Backend running on port 5000"));

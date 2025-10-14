@@ -199,6 +199,7 @@ html, body {
   list-style: none;
   padding: 0px 0;
   margin: 0;
+  margin-top: 50px;
   max-height: 90px;
   overflow-y: auto;
   z-index: 10;
@@ -230,4 +231,29 @@ html, body {
 
 .SuggestionsDropdown::-webkit-scrollbar-corner {
   background-color: transparent;
+}
+
+
+.ErrorPopup {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.CloseBtn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
 }
