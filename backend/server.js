@@ -64,12 +64,12 @@ app.post("/api/delete-songs", (req, res) => {
   res.json({ success: true, addedSongs });
 });
 
-// ✅ NEW: Endpoint for Python (or other) to fetch the current songs
+
 app.get("/api/current-songs", (req, res) => {
   res.json({ addedSongs });
 });
 
-// ✅ NEW: Optional — allow frontend to POST to this instead of 8000
+
 app.post("/api/receive-songs", (req, res) => {
   const { addedSongs: songs } = req.body;
   if (Array.isArray(songs)) {

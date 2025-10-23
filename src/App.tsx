@@ -21,7 +21,6 @@ function App() {
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // ✅ Toggle a song selection
   const handleToggleSong = (song: string) => {
     const newSelected = new Set(selectedSongs);
     if (newSelected.has(song)) {
@@ -32,7 +31,7 @@ function App() {
     setSelectedSongs(newSelected);
   };
 
-  // ✅ Delete selected songs (POST to backend)
+
   const handleDeleteSelected = async () => {
     const songsToDelete = Array.from(selectedSongs);
     if (songsToDelete.length === 0) return;
@@ -59,14 +58,14 @@ function App() {
     }
   };
 
-  // ✅ Reset backend when page loads
+
   useEffect(() => {
     fetch('http://localhost:5000/reset', { method: 'POST' })
       .then(() => console.log('Backend reset on page load'))
       .catch(err => console.error('Failed to reset backend:', err));
   }, []);
 
-  // ✅ Fetch search suggestions
+
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSuggestions([]);
@@ -99,7 +98,7 @@ function App() {
     setSuggestions([]);
   };
 
-  // ✅ Add song to playlist
+
   const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
       const song = searchQuery.trim();
@@ -132,7 +131,7 @@ function App() {
     }
   };
 
-  // 🧩 Send updated playlist to Node backend
+
   useEffect(() => {
     if (addedSongs.length === 0) return;
 
@@ -150,7 +149,7 @@ function App() {
     };
 
     sendToNodeBackend();
-  }, [addedSongs]); // Trigger when playlist updates
+  }, [addedSongs]);
 
   return (
     <div className="PageContainer">
