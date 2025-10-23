@@ -137,7 +137,7 @@ function App() {
 
     const sendToNodeBackend = async () => {
       try {
-        await fetch("http://localhost:8000/receive-songs", {
+        await fetch("http://localhost:5000/api/receive-songs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ addedSongs }),

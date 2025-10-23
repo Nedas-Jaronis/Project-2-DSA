@@ -236,7 +236,6 @@ html, body {
 
 .ErrorPopup {
   position: absolute;
-  top: 250px;
   left: 50%;
   transform: translateX(-50%);
   width: 300px;
@@ -251,9 +250,9 @@ html, body {
 }
 
 .ErrorIcon {
-  width: 1000px;
-  height: 1000px;
-  z-index: 1000000;
+  width: 200px;  /* huge icon */
+  height: 200px;
+
 }
 
 .CloseBtn {
