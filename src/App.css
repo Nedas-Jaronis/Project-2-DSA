@@ -236,24 +236,23 @@ html, body {
 
 .ErrorPopup {
   position: absolute;
-  top: 250px;          /* adjust as needed */
-  left: 50%;          /* center horizontally */
-  transform: translateX(-50%); /* center precisely */
-  width: 300px;       /* bigger width */
-  height: 300px;      /* big height */
-  background-color: transparent; /* stronger red */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 300px;
+  background-color: transparent;
   border: 3px solid transparent;
   border-radius: 16px;
   display: flex;
-  justify-content: center; /* center content horizontally */
-  align-items: center;     /* center content vertically */
-  padding: 0;              /* remove inner spacing */
+  justify-content: center;
+  align-items: center;
+  padding: 0;
 }
 
 .ErrorIcon {
-  width: 1000px;  /* huge icon */
-  height: 1000px;
-  z-index: 1000000;
+  width: 200px;  /* huge icon */
+  height: 200px;
+
 }
 
 .CloseBtn {

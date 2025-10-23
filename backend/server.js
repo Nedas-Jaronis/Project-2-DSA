@@ -20,21 +20,31 @@ fs.createReadStream("data/song_names.csv")
     console.log(`✅ Loaded ${validSongs.size} songs from dataset`);
   });
 
+
+// ✅ Get all added songs
+app.get("/api/songs", (req, res) => res.json(addedSongs));
+
 // ✅ Add song
 app.post("/api/add-song", (req, res) => {
   const { song } = req.body;
   if (!song) return res.status(400).json({ error: "Song is required" });
 
-  if (!validSongs.has(song.toLowerCase())) {
+  const songLower = song.toLowerCase();
+
+  // ✅ Check if song exists in dataset
+  if (!validSongs.has(songLower)) {
     return res.status(400).json({ error: "Song not found in dataset" });
   }
 
+  // ✅ Prevent duplicates (case-insensitive)
+  if (addedSongs.some((s) => s.toLowerCase() === songLower)) {
+    return res.status(400).json({ error: "Song already added" });
+  }
+
+  // ✅ Add new song
   addedSongs.push(song);
   res.json({ success: true, addedSongs });
 });
-
-// ✅ Get all added songs
-app.get("/api/songs", (req, res) => res.json(addedSongs));
 
 // ✅ Get suggestions
 app.get("/api/suggestions", (req, res) => {
