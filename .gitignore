@@ -25,3 +25,4 @@ dist-ssr
 
 
 /backend/data/song_names.csv
+backend/data/tracks.csv
