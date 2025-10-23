@@ -21,7 +21,7 @@ function App() {
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-
+  // ✅ Toggle a song selection
   const handleToggleSong = (song: string) => {
     const newSelected = new Set(selectedSongs);
     if (newSelected.has(song)) {
@@ -31,7 +31,8 @@ function App() {
     }
     setSelectedSongs(newSelected);
   };
-  //Function to handle the selection delete functionality
+
+  // ✅ Delete selected songs (POST to backend)
   const handleDeleteSelected = async () => {
     const songsToDelete = Array.from(selectedSongs);
     if (songsToDelete.length === 0) return;
@@ -58,15 +59,14 @@ function App() {
     }
   };
 
-
-
-  // ✅ Reset backend on page load
+  // ✅ Reset backend when page loads
   useEffect(() => {
     fetch('http://localhost:5000/reset', { method: 'POST' })
       .then(() => console.log('Backend reset on page load'))
       .catch(err => console.error('Failed to reset backend:', err));
   }, []);
 
+  // ✅ Fetch search suggestions
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSuggestions([]);
@@ -99,6 +99,7 @@ function App() {
     setSuggestions([]);
   };
 
+  // ✅ Add song to playlist
   const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
       const song = searchQuery.trim();
@@ -113,18 +114,14 @@ function App() {
         if (!res.ok) {
           const errorData = await res.json();
           setErrorMessage(errorData.error || 'Failed to add song');
-
           setTimeout(() => setErrorMessage(''), 3000);
-
-
-          setSearchQuery('')
-          setSuggestions([])
+          setSearchQuery('');
+          setSuggestions([]);
           return;
         }
 
         const data = await res.json();
         console.log('Backend now has:', data.addedSongs);
-
         setAddedSongs(data.addedSongs);
         setSearchQuery('');
         setSuggestions([]);
@@ -134,6 +131,26 @@ function App() {
       }
     }
   };
+
+  // 🧩 Send updated playlist to Node backend
+  useEffect(() => {
+    if (addedSongs.length === 0) return;
+
+    const sendToNodeBackend = async () => {
+      try {
+        await fetch("http://localhost:8000/receive-songs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ addedSongs }),
+        });
+        console.log("📡 Sent songs to Node backend:", addedSongs);
+      } catch (err) {
+        console.error("❌ Failed to send songs to Node backend:", err);
+      }
+    };
+
+    sendToNodeBackend();
+  }, [addedSongs]); // Trigger when playlist updates
 
   return (
     <div className="PageContainer">
@@ -158,59 +175,57 @@ function App() {
             </ul>
           )}
 
-{errorMessage && (
-  <div className="ErrorPopup">
-    <img src="/src/spiderman-electro.png" alt="Error" className="ErrorIcon" />
-    <span>{errorMessage}</span>
-    <button onClick={() => setErrorMessage('')} className="CloseBtn">X</button>
-  </div>
-)}
-
+          {errorMessage && (
+            <div className="ErrorPopup">
+              <img src="/src/spiderman-electro.png" alt="Error" className="ErrorIcon" />
+              <span>{errorMessage}</span>
+              <button onClick={() => setErrorMessage('')} className="CloseBtn">X</button>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="mainContent">
         <div className="LeftAddContainer">
-  <div className="AddSongs">
-    <h2>Playlist</h2>
-    {addedSongs.map((song, index) => (
-      <div
-        key={index}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '4px',
-        }}
-      >
-        <span>{song}</span>
-        <input
-          type="checkbox"
-          checked={selectedSongs.has(song)}
-          onChange={() => handleToggleSong(song)}
-        />
-      </div>
-    ))}
+          <div className="AddSongs">
+            <h2>Playlist</h2>
+            {addedSongs.map((song, index) => (
+              <div
+                key={index}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '4px',
+                }}
+              >
+                <span>{song}</span>
+                <input
+                  type="checkbox"
+                  checked={selectedSongs.has(song)}
+                  onChange={() => handleToggleSong(song)}
+                />
+              </div>
+            ))}
 
-    {addedSongs.length > 0 && (
-      <button
-        onClick={handleDeleteSelected}
-        style={{
-          marginTop: '10px',
-          padding: '6px 12px',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          backgroundColor: '#e74c3c',
-          color: 'white',
-          border: 'none',
-        }}
-      >
-        Delete Selected
-      </button>
-    )}
-  </div>
-</div>
-
+            {addedSongs.length > 0 && (
+              <button
+                onClick={handleDeleteSelected}
+                style={{
+                  marginTop: '10px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  backgroundColor: '#e74c3c',
+                  color: 'white',
+                  border: 'none',
+                }}
+              >
+                Delete Selected
+              </button>
+            )}
+          </div>
+        </div>
 
         <div className="ChartContainer">
           <div className="Chart">
