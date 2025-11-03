@@ -30,5 +30,5 @@ for chunk in pd.read_csv(csv_file, chunksize=50000):
 pd.Series(list(song_names_set), name="name").to_csv(
     song_names_path, index=False)
 
-print(f"✅ Saved full dataset to {full_csv_path}")
-print(f"✅ Saved {len(song_names_set)} unique song names to {song_names_path}")
+print(f"Saved full dataset to {full_csv_path}")
+print(f"Saved {len(song_names_set)} unique song names to {song_names_path}")

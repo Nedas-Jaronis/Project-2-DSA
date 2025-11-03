@@ -53,7 +53,7 @@ function App() {
       setAddedSongs(data.addedSongs);
       setSelectedSongs(new Set());
     } catch (err) {
-      console.error("❌ Error deleting songs from backend:", err);
+      console.error("Error deleting songs from backend:", err);
       alert("Error connecting to backend");
     }
   };
@@ -125,7 +125,7 @@ function App() {
         setSearchQuery('');
         setSuggestions([]);
       } catch (err) {
-        console.error('❌ Error sending to backend:', err);
+        console.error('Error sending to backend:', err);
         alert('Error connecting to backend');
       }
     }
@@ -142,9 +142,9 @@ function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ addedSongs }),
         });
-        console.log("📡 Sent songs to Node backend:", addedSongs);
+        console.log("Sent songs to Node backend:", addedSongs);
       } catch (err) {
-        console.error("❌ Failed to send songs to Node backend:", err);
+        console.error("Failed to send songs to Node backend:", err);
       }
     };
 

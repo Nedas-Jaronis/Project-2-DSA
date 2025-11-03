@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 class TreeNode {
@@ -116,6 +117,91 @@ public:
     }
 };
 
+vector<string> parseCSVLine(const string& line) {
+    vector<string> tokens;
+    string token;
+    bool inQuotes = false;
+
+    for (char c : line) {
+        if (c == '"')
+            inQuotes = !inQuotes;
+        else if (c == ',' && !inQuotes) {
+            tokens.push_back(token);
+            token.clear();
+        } else {
+            token += c;
+        }
+    }
+    tokens.push_back(token);
+    return tokens;
+}
+
 int main() {
-    
+    string filePath = "data/tracks.csv";
+    ifstream file(filePath);
+
+    if (!file.is_open()) {
+        cerr << "Error: Could not open file " << filePath << endl;
+        return 1;
+    }
+
+    BinaryTree tree;
+    string line;
+    getline(file, line);
+
+    int count = 0;
+    while (getline(file, line)) {
+        vector<string> fields = parseCSVLine(line);
+
+        if (fields.size() < 20) continue;
+
+        string name = fields[0];
+        string id = fields[1];
+        int popularity = stoi(fields[2]);
+        int duration_ms = stoi(fields[3]);
+        int isExplicit = stoi(fields[4]);
+        string artistsRaw = fields[5];
+        string releaseDate = fields[14];
+        float danceability = stof(fields[7]);
+        float energy = stof(fields[8]);
+        int key = stoi(fields[9]);
+        float loudness = stof(fields[10]);
+        int mode = stoi(fields[11]);
+        float speechiness = stof(fields[12]);
+        float acousticness = stof(fields[13]);
+        float instrumentalness = stof(fields[15]);
+        float liveness = stof(fields[16]);
+        float valence = stof(fields[17]);
+        float tempo = stof(fields[18]);
+        int time_signature = stoi(fields[19]);
+
+        // clean up artist list (remove brackets, quotes)
+        artistsRaw.erase(remove(artistsRaw.begin(), artistsRaw.end(), '['), artistsRaw.end());
+        artistsRaw.erase(remove(artistsRaw.begin(), artistsRaw.end(), ']'), artistsRaw.end());
+        artistsRaw.erase(remove(artistsRaw.begin(), artistsRaw.end(), '\''), artistsRaw.end());
+        vector<string> artists;
+        stringstream ss(artistsRaw);
+        string artist;
+        while (getline(ss, artist, ',')) {
+            artist.erase(0, artist.find_first_not_of(" \t"));
+            artist.erase(artist.find_last_not_of(" \t") + 1);
+            if (!artist.empty())
+                artists.push_back(artist);
+        }
+
+        TreeNode* node = new TreeNode(
+            name, id, popularity, duration_ms, isExplicit, artists, {},
+            releaseDate, danceability, energy, key, loudness, mode,
+            speechiness, acousticness, instrumentalness, liveness, valence, tempo, time_signature
+        );
+
+        tree.insert(node);
+        count++;
+
+        if (count % 10000 == 0)
+            cout << "Inserted " << count << " songs...\n";
+    }
+
+    cout << "Loaded " << count << " tracks into the binary tree.\n";
+    return 0;
 }

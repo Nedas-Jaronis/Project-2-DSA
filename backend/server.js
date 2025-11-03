@@ -10,7 +10,6 @@ app.use(express.json());
 let validSongs = new Set();
 let addedSongs = [];
 
-// ✅ Load valid songs from CSV
 fs.createReadStream("data/song_names.csv")
   .pipe(csv())
   .on("data", (row) => {
@@ -21,32 +20,26 @@ fs.createReadStream("data/song_names.csv")
   });
 
 
-// ✅ Get all added songs
 app.get("/api/songs", (req, res) => res.json(addedSongs));
 
-// ✅ Add song
 app.post("/api/add-song", (req, res) => {
   const { song } = req.body;
   if (!song) return res.status(400).json({ error: "Song is required" });
 
   const songLower = song.toLowerCase();
 
-  // ✅ Check if song exists in dataset
   if (!validSongs.has(songLower)) {
     return res.status(400).json({ error: "Song not found in dataset" });
   }
 
-  // ✅ Prevent duplicates (case-insensitive)
   if (addedSongs.some((s) => s.toLowerCase() === songLower)) {
     return res.status(400).json({ error: "Song already added" });
   }
 
-  // ✅ Add new song
   addedSongs.push(song);
   res.json({ success: true, addedSongs });
 });
 
-// ✅ Get suggestions
 app.get("/api/suggestions", (req, res) => {
   const query = req.query.q?.toLowerCase() || "";
   if (!query) return res.json([]);
@@ -58,13 +51,11 @@ app.get("/api/suggestions", (req, res) => {
   res.json(matches);
 });
 
-// ✅ Reset songs
 app.post("/reset", (req, res) => {
   addedSongs = [];
   res.json({ message: "Songs cleared" });
 });
 
-// ✅ Delete selected songs
 app.post("/api/delete-songs", (req, res) => {
   const { songs } = req.body;
   if (!Array.isArray(songs))
