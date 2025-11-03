@@ -15,9 +15,10 @@ interface SkillData {
 
 interface SkillRadarProps {
   data: SkillData[];
+  fixedScale?: boolean; // optional, default true
 }
 
-const SkillRadar: React.FC<SkillRadarProps> = ({ data }) => {
+const SkillRadar: React.FC<SkillRadarProps> = ({ data, fixedScale = true }) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <RadarChart
@@ -28,9 +29,14 @@ const SkillRadar: React.FC<SkillRadarProps> = ({ data }) => {
       >
         <PolarGrid gridType="circle" />
         <PolarAngleAxis dataKey="subject" />
-        <PolarRadiusAxis angle={30} domain={[0, 100]} /> {/* adjust domain to your data */}
+        <PolarRadiusAxis
+          angle={30}
+          domain={fixedScale ? [0, 100] : undefined}
+          tickFormatter={(tick) => Math.round(tick).toString()} // ✅ convert to string
+          tickCount={6} // rings at 0, 20, 40, 60, 80, 100
+        />
         <Radar
-          name="Skills"
+          name="Average"
           dataKey="value"
           stroke="#8884d8"
           fill="#8884d8"
