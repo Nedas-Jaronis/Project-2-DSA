@@ -4,7 +4,23 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 using namespace std;
+
+// Attribute ranges
+struct AttributeRange
+{
+    float minDance, maxDance;
+    float minEnergy, maxEnergy;
+    float minValence, maxValence;
+    float minTempo, maxTempo;
+    float minPopularity, maxPopularity; // not used in chart
+    float minLoudness, maxLoudness;
+    float minAcousticness, maxAcousticness;
+    float minInstrumentalness, maxInstrumentalness;
+    float minSpeechiness, maxSpeechiness;
+    float minLiveness, maxLiveness; // not used in chart
+};
 
 class TreeNode
 {
@@ -134,21 +150,6 @@ public:
     }
 };
 
-// Attribute ranges
-struct AttributeRange
-{
-    float minDance, maxDance;
-    float minEnergy, maxEnergy;
-    float minValence, maxValence;
-    float minTempo, maxTempo;
-    float minPopularity, maxPopularity; // not used in chart
-    float minLoudness, maxLoudness;
-    float minAcousticness, maxAcousticness;
-    float minInstrumentalness, maxInstrumentalness;
-    float minSpeechiness, maxSpeechiness;
-    float minLiveness, maxLiveness; // not used in chart
-};
-
 // Averages for relevant data members
 struct Averages
 {
@@ -186,7 +187,7 @@ Averages getAverages(const string &filename)
     getline(ss, value, ',');
     avg.valence = stof(value);
     getline(ss, value, ',');
-    avg.valence = stof(value);
+    avg.tempo = stof(value);
     getline(ss, value, ',');
     getline(ss, value, ',');
     avg.loudness = stof(value);
@@ -263,6 +264,8 @@ StdDevs getStandardDevs(const string &filename, const Averages &avg)
     sd.instrumentalness = sqrt(sumInstrumental / count);
     sd.speechiness = sqrt(sumSpeech / count);
     sd.loudness = sqrt(sumLoud / count);
+
+    return sd;
 }
 
 // calculates upper and lower bounds for ranges of data

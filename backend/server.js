@@ -152,16 +152,22 @@ app.get("/api/averages", (req, res) => {
 
 //endpoint for getting recommendations from c++ executable
 app.get("/api/recommendations", async (req, res) => {
+  console.log("Recommendations endpoint hit"); // Debug log
+  console.log("Query params:", req.query); // Debug log
+  
   const searchType = req.query.type || "BFS"; 
   const k = parseFloat(req.query.k) || 0.5;
+
+  console.log("Added songs:", addedSongs); // Debug log
 
   if (addedSongs.length === 0) {
     return res.json({ recommendations: [] });
   }
 
   try {
-    // Call the C++ executable (from tree.cpp)
-    const { stdout, stderr } = await execPromise(`./recommendation ${searchType} ${k}`);
+    const { stdout, stderr } = await execPromise(`tree.exe ${searchType} ${k}`);
+    
+    console.log("C++ stdout:", stdout);
     
     if (stderr) {
       console.error("C++ stderr:", stderr);
@@ -170,16 +176,24 @@ app.get("/api/recommendations", async (req, res) => {
     // Parse JSON output from c++ executable
     const recommendations = JSON.parse(stdout.trim());
     
+    console.log("Parsed recommendations:", recommendations);
+    
     // Filter out songs that are already in the playlist
     const addedSongsLower = addedSongs.map(s => s.toLowerCase());
     const filtered = recommendations.filter(song => 
       !addedSongsLower.includes(song.toLowerCase())
     );
 
+    console.log("Filtered recommendations:", filtered);
+
     res.json({ recommendations: filtered });
   } catch (error) {
     console.error("Error calling C++ recommendation:", error);
-    res.status(500).json({ 
+    console.error("Error stack:", error.stack);
+    
+    // Always return JSON, never let it fall through to HTML error page
+    return res.status(500).json({ 
+      recommendations: [],
       error: "Failed to generate recommendations",
       details: error.message 
     });

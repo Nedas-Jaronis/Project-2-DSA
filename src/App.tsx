@@ -32,6 +32,8 @@ function App() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState('');
+  const [recommendations, setRecommendations] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Toggle song selection
   const handleToggleSong = (song: string) => {
@@ -40,6 +42,35 @@ function App() {
     else newSelected.add(song);
     setSelectedSongs(newSelected);
   };
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [activeButton]);
+
+  const fetchRecommendations = async () => {
+  setIsLoading(true);
+  try {
+    const response = await fetch(`/api/recommendations?type=${activeButton}&k=0.5`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Response is not JSON");
+    }
+    
+    const data = await response.json();
+    setRecommendations(data.recommendations || []);
+  } catch (error) {
+    console.error('Error fetching recommendations:', error);
+    setRecommendations([]);
+    setErrorMessage('Failed to load recommendations. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Delete selected songs
   const handleDeleteSelected = async () => {
@@ -156,7 +187,7 @@ function App() {
     fetchAverages();
   }, [addedSongs]);
 
-  return (
+return (
     <div className="PageContainer">
       <div className="headerContainer">
         <div className="Header" style={{ position: 'relative' }}>
@@ -214,15 +245,42 @@ function App() {
 
         <div className="RightRecommendContainer">
           <div className="RecommendSongs">
-            <h1>Rec 1</h1>
-            <h1>Rec 2</h1>
+            <h2>Recommendations ({activeButton})</h2>
+            {isLoading ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>Loading recommendations...</p>
+                <div className="spinner" style={{ margin: '10px auto', width: '30px', height: '30px', border: '3px solid #f3f3f3', borderTop: '3px solid #3498db', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              </div>
+            ) : addedSongs.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>Add songs to your playlist to get recommendations</p>
+            ) : recommendations.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>No recommendations available</p>
+            ) : (
+              <div>
+                {recommendations.slice(0, 10).map((song, index) => (
+                  <div key={index} style={{ marginBottom: '8px', padding: '8px', borderBottom: '1px solid #eee' }}>
+                    <span style={{ fontWeight: 'bold' }}>{index + 1}.</span> {song}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="toggle">
-        <div className={`BFS ${activeButton === 'BFS' ? 'active' : ''}`} onClick={() => setActiveButton('BFS')}><h1>BFS</h1></div>
-        <div className={`DFS ${activeButton === 'DFS' ? 'active' : ''}`} onClick={() => setActiveButton('DFS')}><h1>DFS</h1></div>
+        <div 
+          className={`BFS ${activeButton === 'BFS' ? 'active' : ''}`} 
+          onClick={() => setActiveButton('BFS')}
+        >
+          <h1>BFS</h1>
+        </div>
+        <div 
+          className={`DFS ${activeButton === 'DFS' ? 'active' : ''}`} 
+          onClick={() => setActiveButton('DFS')}
+        >
+          <h1>DFS</h1>
+        </div>
       </div>
     </div>
   );
