@@ -48,6 +48,7 @@ class BinaryTree {
 private:
     TreeNode* root;
 
+    // Check if node attributes are within the given range
     bool inRange(TreeNode* node, const AttributeRange& r) {
     return (
         node->danceability >= r.minDance && node->danceability <= r.maxDance &&
@@ -61,6 +62,7 @@ private:
         );
     }
 
+    // DFS helper function
     void dfsHelper(TreeNode* node, const AttributeRange& r, vector<TreeNode*>& result){
         if (!node) return;
         dfsHelper(node->left, r, result);
@@ -72,6 +74,7 @@ public:
 
     BinaryTree() : root(nullptr) {}
 
+    // Insert a new node into the binary tree
     void insert(TreeNode* newNode){
         if (!root){ root = newNode; return; }
         TreeNode* curr = root;
@@ -80,12 +83,14 @@ public:
         if (newNode->name < parent->name) parent->left = newNode; else parent->right = newNode;
     }
 
+    // DFS traversal
     vector<TreeNode*> dfs(const AttributeRange& r) { 
         vector<TreeNode*> result; 
         dfsHelper(root, r, result); 
         return result; 
     }
     
+    // BFS traversal
     vector<TreeNode*> bfs(const AttributeRange& r) {
         vector<TreeNode*> result;
         if (!root) return result;
@@ -173,6 +178,7 @@ StdDevs getStandardDevs(const string& filename, const Averages& avg) {
         stringstream ss(line);
         string value;
 
+        // Skip irrelevant fields
         for (int i = 0; i < 8; i++) getline(ss, value, ',');
         getline(ss, value, ','); double dance = stod(value);
         getline(ss, value, ','); double energy = stod(value);
@@ -186,6 +192,7 @@ StdDevs getStandardDevs(const string& filename, const Averages& avg) {
         getline(ss, value, ','); double valence = stod(value);
         getline(ss, value, ','); double tempo = stod(value);
 
+        // Squared differences for standard deviation calculation
         sumDance += pow(dance - avg.dance, 2);
         sumEnergy += pow(energy - avg.energy, 2);
         sumValence += pow(valence - avg.valence, 2);
@@ -231,4 +238,119 @@ AttributeRange makeRanges(const Averages& avg, const StdDevs& sd, float k = 0.5f
     r.maxSpeechiness = avg.speechiness + k * sd.speechiness;
 
     return r;
+}
+
+//to help parse CSV line
+vector<string> parseCSVLine(const string& line) {
+    vector<string> fields;
+    stringstream ss(line);
+    string field;
+    bool inQuotes = false;
+
+    for (size_t i = 0; i < line.length(); i++) {
+        char c = line[i];
+        if (c == '"') {
+            inQuotes = !inQuotes;
+        }
+        else if (c == ',' && !inQuotes) {
+            fields.push_back(field);
+            field.clear();
+        }
+        else {
+            field += c;
+        }
+    }
+    fields.push_back(field);
+    return fields;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) { //example call: ./recommendation BFS 0.5 --> k value could theoretically be changed to alter recommendation range, BFS and DFS are primary options
+        cerr << "Format:" << argv[0] << " < BFS | DFS >  [k_value]" << endl;
+        return 1;
+    }
+
+    string searchType = argv[1]; //BFS or DFS
+    float k = 0.5f; //will recommend within +- 0.5 standard deviations
+    if (argc >= 3) k = stof(argv[2]);
+
+    try {
+        //get averages
+        Averages avg = getAverages("data/averages.csv");
+        
+        //get standard deviations
+        StdDevs sd = getStandardDevs("data/tracks.csv", avg);
+
+        //create ranges
+        AttributeRange range = makeRanges(avg, sd, k);
+
+        //build tree from tracks.csv, will be what we traverse
+        BinaryTree tree;
+        ifstream file("data/tracks.csv");
+        if (!file.is_open()) throw runtime_error("Failed to open tracks.csv");
+
+        //ignore header
+        string header;
+        getline(file, header);
+
+        //get data for the tree nodes
+        string line;
+        while (getline(file, line)) {
+            //parse line using helper function
+            vector<string> fields = parseCSVLine(line);
+            if (fields.size() < 20) continue; //ensure all data
+
+            TreeNode* node = new TreeNode(
+                fields[1],        // name
+                fields[2],        // id
+                stoi(fields[2]),  // popularity
+                stoi(fields[3]),  // duration
+                stoi(fields[4]),  // explicit
+                {},               // artists
+                fields[7],        // release date
+                stof(fields[8]),  // danceability
+                stof(fields[9]),  // energy
+                stoi(fields[10]), // key
+                stof(fields[11]), // loudness
+                stoi(fields[12]), // mode
+                stof(fields[13]), // speechiness
+                stof(fields[14]), // acousticness
+                stof(fields[15]), // instrumentalness
+                stof(fields[16]), // liveness
+                stof(fields[17]), // valence
+                stof(fields[18]), // tempo
+                stoi(fields[19])  // time signature
+            );
+            tree.insert(node);
+        }
+        file.close();
+
+        //searching
+        vector<TreeNode*> results;
+        if (searchType == "BFS") {
+            results = tree.bfs(range);
+        }
+        else if (searchType == "DFS") {
+            results = tree.dfs(range);
+        }
+        else {
+            cerr << "Invalid search" << endl;
+            return 1;
+        }
+
+        //output results as JSON for use with frontend, array formated
+        cout << "[";
+        for (size_t i = 0; i < results.size(); i++) {
+            if (i > 0) cout << ",";
+            cout << "\"" << results[i]->name << "\"";
+        }
+        cout << "]";
+
+    }//try/catch to test for errors
+    catch (const exception& e) {
+        cerr << "Error: " << e.what() << endl;
+        return 1;
+    }
+
+    return 0;
 }
