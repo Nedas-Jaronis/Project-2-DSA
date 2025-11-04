@@ -647,3 +647,20 @@ html, body {
   color: #667eea;
   margin-right: 8px;
 }
+
+/* Make the scrollbar transparent for .RecommendSongs */
+.RecommendSongs::-webkit-scrollbar {
+  background: transparent; /* Background of the scrollbar track */
+}
+
+.RecommendSongs::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.RecommendSongs::-webkit-scrollbar-thumb:hover {
+  background: transparent
+}
+
+.RecommendSongs::-webkit-scrollbar-track {
+  background: transparent;
+}
