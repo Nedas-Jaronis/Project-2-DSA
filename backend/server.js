@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import fs from "fs";
 import csv from "csv-parser";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const app = express();
 app.use(cors());
@@ -144,6 +146,42 @@ app.get("/api/averages", (req, res) => {
 
   for (const key in sum) sum[key] /= count;
   res.json(sum);
+});
+
+//endpoint for getting recommendations from c++ executable
+app.get("/api/recommendations", async (req, res) => {
+  const searchType = req.query.type || "BFS"; 
+  const k = parseFloat(req.query.k) || 0.5;
+
+  if (addedSongs.length === 0) {
+    return res.json({ recommendations: [] });
+  }
+
+  try {
+    // Call the C++ executable (from tree.cpp)
+    const { stdout, stderr } = await execPromise(`./recommendation ${searchType} ${k}`);
+    
+    if (stderr) {
+      console.error("C++ stderr:", stderr);
+    }
+
+    // Parse JSON output from c++ executable
+    const recommendations = JSON.parse(stdout.trim());
+    
+    // Filter out songs that are already in the playlist
+    const addedSongsLower = addedSongs.map(s => s.toLowerCase());
+    const filtered = recommendations.filter(song => 
+      !addedSongsLower.includes(song.toLowerCase())
+    );
+
+    res.json({ recommendations: filtered });
+  } catch (error) {
+    console.error("Error calling C++ recommendation:", error);
+    res.status(500).json({ 
+      error: "Failed to generate recommendations",
+      details: error.message 
+    });
+  }
 });
 
 // Autocomplete suggestions
