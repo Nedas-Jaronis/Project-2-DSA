@@ -5,6 +5,8 @@ import csv from "csv-parser";
 import { exec } from "child_process";
 import { promisify } from "util";
 
+const execPromise = promisify(exec);
+
 const app = express();
 app.use(cors());
 app.use(express.json());
