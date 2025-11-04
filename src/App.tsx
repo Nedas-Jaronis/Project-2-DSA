@@ -121,7 +121,7 @@ function App() {
       tempo: Math.min(Math.max(((attrs.tempo ?? 120) - 50) / (200 - 50) * 100, 0), 100), // map 50-200 BPM to 0-100
       acousticness: Math.min(Math.max((attrs.acousticness ?? 0) * 100, 0), 100),
       instrumentalness: Math.min(Math.max(Math.sqrt(attrs.instrumentalness ?? 0) * 100, 0), 100),
-      speechiness: Math.min(Math.max(Math.sqrt(attrs.speechiness ?? 0) * 100, 0), 100),
+      speechiness: Math.min(Math.max(Math.pow(attrs.speechiness ?? 0, 0.25) * 100, 0), 100),
       loudness: Math.min(Math.max(((attrs.loudness ?? -60) + 60) / 60 * 100, 0), 100), // -60dB -> 0, 0dB -> 100
     };
   };
