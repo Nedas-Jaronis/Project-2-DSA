@@ -7,10 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let validSongs = new Map(); // songName -> attributes object
+let validSongs = new Map();
 let addedSongs = [];
 
-// Load all songs from tracks.csv into memory (only once)
+// Load all songs from CSV into memory
 function loadAllSongs() {
   return new Promise((resolve, reject) => {
     const map = new Map();
@@ -34,23 +34,15 @@ function loadAllSongs() {
       })
       .on("end", () => {
         validSongs = map;
-        console.log(`✅ Loaded ${validSongs.size} songs from dataset`);
+        console.log(`Loaded ${validSongs.size} songs`);
         resolve();
       })
       .on("error", reject);
   });
 }
 
-// Utility to save averages CSV (optional)
 function saveAveragesCSV() {
-  if (addedSongs.length === 0) {
-    fs.writeFileSync(
-      "data/averages.csv",
-      "danceability,energy,valence,tempo,popularity,loudness,acousticness,instrumentalness,speechiness,liveness\n"
-    );
-    return;
-  }
-
+  if (addedSongs.length === 0) return;
   const sum = {
     danceability: 0,
     energy: 0,
@@ -63,39 +55,33 @@ function saveAveragesCSV() {
     speechiness: 0,
     liveness: 0,
   };
-  let count = 0;
 
-  addedSongs.forEach((songName) => {
-    const attrs = validSongs.get(songName.toLowerCase());
+  let count = 0;
+  addedSongs.forEach((song) => {
+    const attrs = validSongs.get(song.toLowerCase());
     if (attrs) {
-      for (const key in sum) {
-        sum[key] += attrs[key];
-      }
+      for (const key in sum) sum[key] += attrs[key];
       count++;
     }
   });
 
-  for (const key in sum) {
-    sum[key] /= count;
-  }
+  for (const key in sum) sum[key] /= count;
 
   const header = Object.keys(sum).join(",");
   const values = Object.values(sum).join(",");
   fs.writeFileSync("data/averages.csv", header + "\n" + values);
-  console.log("📊 Saved averages.csv with current playlist averages");
 }
 
-// Routes
-app.get("/api/songs", (req, res) => res.json(addedSongs));
+// Get current playlist
+app.get("/api/songs", (req, res) => res.json({ addedSongs }));
 
+// Add song
 app.post("/api/add-song", (req, res) => {
   const { song } = req.body;
-  if (!song) return res.status(400).json({ error: "Song is required" });
+  if (!song) return res.status(400).json({ error: "Song required" });
 
   const songLower = song.toLowerCase();
-  if (!validSongs.has(songLower))
-    return res.status(400).json({ error: "Song not found in dataset" });
-
+  if (!validSongs.has(songLower)) return res.status(400).json({ error: "Song not found" });
   if (addedSongs.some((s) => s.toLowerCase() === songLower))
     return res.status(400).json({ error: "Song already added" });
 
@@ -104,27 +90,17 @@ app.post("/api/add-song", (req, res) => {
   res.json({ success: true, addedSongs });
 });
 
-app.get("/api/song-attributes", (req, res) => {
-  const name = req.query.name?.toString().toLowerCase();
-  if (!name || !validSongs.has(name)) {
-    return res.status(404).json({ error: "Song not found" });
-  }
+// Delete selected songs
+app.post("/api/delete-songs", (req, res) => {
+  const { songs } = req.body;
+  if (!Array.isArray(songs)) return res.status(400).json({ error: "Songs array required" });
 
-  res.json({ attributes: validSongs.get(name) });
+  addedSongs = addedSongs.filter((s) => !songs.includes(s));
+  saveAveragesCSV();
+  res.json({ success: true, addedSongs });
 });
 
-app.get("/api/suggestions", (req, res) => {
-  const query = req.query.q?.toString().toLowerCase() || "";
-  if (!query) return res.json([]);
-
-  const matches = Array.from(validSongs.keys())
-    .filter((name) => name.startsWith(query) && name !== query)
-    .slice(0, 10);
-
-  res.json(matches);
-});
-
-// **New endpoint**: return average attributes
+// Get averaged attributes for current playlist
 app.get("/api/averages", (req, res) => {
   if (addedSongs.length === 0) {
     return res.json({
@@ -149,10 +125,10 @@ app.get("/api/averages", (req, res) => {
     speechiness: 0,
     loudness: 0,
   };
-  let count = 0;
 
-  addedSongs.forEach((songName) => {
-    const attrs = validSongs.get(songName.toLowerCase());
+  let count = 0;
+  addedSongs.forEach((song) => {
+    const attrs = validSongs.get(song.toLowerCase());
     if (attrs) {
       sum.danceability += attrs.danceability;
       sum.energy += attrs.energy;
@@ -166,49 +142,28 @@ app.get("/api/averages", (req, res) => {
     }
   });
 
-  for (const key in sum) {
-    sum[key] /= count;
-  }
-
+  for (const key in sum) sum[key] /= count;
   res.json(sum);
 });
 
+// Autocomplete suggestions
+app.get("/api/suggestions", (req, res) => {
+  const query = req.query.q?.toLowerCase() || "";
+  if (!query) return res.json([]);
+  const matches = Array.from(validSongs.keys())
+    .filter((name) => name.startsWith(query) && name !== query)
+    .slice(0, 10);
+  res.json(matches);
+});
+
+// Reset playlist
 app.post("/reset", (req, res) => {
   addedSongs = [];
-  fs.writeFileSync(
-    "data/averages.csv",
-    "danceability,energy,valence,tempo,popularity,loudness,acousticness,instrumentalness,speechiness,liveness\n"
-  );
+  fs.writeFileSync("data/averages.csv", "danceability,energy,valence,tempo,popularity,loudness,acousticness,instrumentalness,speechiness,liveness\n");
   res.json({ message: "Songs cleared" });
-});
-
-app.post("/api/delete-songs", (req, res) => {
-  const { songs } = req.body;
-  if (!Array.isArray(songs))
-    return res.status(400).json({ error: "Songs array is required" });
-
-  addedSongs = addedSongs.filter((song) => !songs.includes(song));
-  saveAveragesCSV();
-  res.json({ success: true, addedSongs });
-});
-
-app.get("/api/current-songs", (req, res) => {
-  res.json({ addedSongs });
-});
-
-app.post("/api/receive-songs", (req, res) => {
-  const { addedSongs: songs } = req.body;
-  if (Array.isArray(songs)) {
-    addedSongs = songs;
-    saveAveragesCSV();
-    console.log("📥 Received updated song list from frontend:", songs);
-    return res.json({ success: true });
-  } else {
-    return res.status(400).json({ error: "Invalid songs array" });
-  }
 });
 
 // Initialize server
 loadAllSongs().then(() => {
-  app.listen(5000, () => console.log("✅ Backend running on port 5000"));
+  app.listen(5000, () => console.log("Backend running on port 5000"));
 });

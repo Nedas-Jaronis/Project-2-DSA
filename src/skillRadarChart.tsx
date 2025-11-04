@@ -15,7 +15,7 @@ interface SkillData {
 
 interface SkillRadarProps {
   data: SkillData[];
-  fixedScale?: boolean; // optional, default true
+  fixedScale?: boolean;
 }
 
 const SkillRadar: React.FC<SkillRadarProps> = ({ data, fixedScale = true }) => {
@@ -32,7 +32,7 @@ const SkillRadar: React.FC<SkillRadarProps> = ({ data, fixedScale = true }) => {
         <PolarRadiusAxis
           angle={30}
           domain={fixedScale ? [0, 100] : undefined}
-          tickFormatter={(tick) => Math.round(tick).toString()} // ✅ convert to string
+          tickFormatter={(tick) => Math.round(tick).toString()}
           tickCount={6} // rings at 0, 20, 40, 60, 80, 100
         />
         <Radar
