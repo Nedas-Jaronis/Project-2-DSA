@@ -580,3 +580,70 @@ html, body {
     font-size: 0.875rem;
   }
 }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* Remove duplicated RecommendSongs and unify with AddSongs */
+.RecommendSongs {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 24px;
+  flex: 1;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 3;
+}
+
+.RecommendSongs h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* For loading and info messages */
+.loading-container, .info-message {
+  text-align: center;
+  color: #a0aec0;
+  padding: 1.25rem;
+}
+.spinner {
+  margin: 18px auto 0;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Song item styling */
+.recommendation-item {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #4a5568;
+  font-weight: 500;
+  border-bottom: 1px solid #eee;
+}
+.recommendation-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateX(4px);
+}
+
+.recommendation-item span {
+  font-weight: 700;
+  color: #667eea;
+  margin-right: 8px;
+}

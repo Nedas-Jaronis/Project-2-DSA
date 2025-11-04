@@ -201,6 +201,33 @@ Averages getAverages(const string &filename)
     return avg;
 }
 
+vector<string> parseCSVLine(const string &line)
+{
+    vector<string> fields;
+    stringstream ss(line);
+    string field;
+    bool inQuotes = false;
+
+    for (size_t i = 0; i < line.length(); i++)
+    {
+        char c = line[i];
+        if (c == '"')
+        {
+            inQuotes = !inQuotes;
+        }
+        else if (c == ',' && !inQuotes)
+        {
+            fields.push_back(field);
+            field.clear();
+        }
+        else
+        {
+            field += c;
+        }
+    }
+    fields.push_back(field);
+    return fields;
+}
 // Calculates standard deviation from data in file
 StdDevs getStandardDevs(const string &filename, const Averages &avg)
 {
@@ -209,50 +236,53 @@ StdDevs getStandardDevs(const string &filename, const Averages &avg)
         throw runtime_error("Failed to open tracks.csv");
 
     string header, line;
-    getline(file, header); // ignore
+    getline(file, header);
 
     int count = 0;
-    double sumDance = 0, sumEnergy = 0, sumValence = 0, sumTempo = 0, sumAcoustic = 0, sumInstrumental = 0, sumSpeech = 0, sumLoud = 0;
+    double sumDance = 0, sumEnergy = 0, sumValence = 0, sumTempo = 0;
+    double sumAcoustic = 0, sumInstrumental = 0, sumSpeech = 0, sumLoud = 0;
 
     while (getline(file, line))
     {
-        stringstream ss(line);
-        string value;
+        if (line.empty())
+            continue;
 
-        // Skip irrelevant fields
-        for (int i = 0; i < 8; i++)
-            getline(ss, value, ',');
-        getline(ss, value, ',');
-        double dance = stod(value);
-        getline(ss, value, ',');
-        double energy = stod(value);
-        getline(ss, value, ',');
-        getline(ss, value, ',');
-        double loud = stod(value);
-        getline(ss, value, ',');
-        getline(ss, value, ',');
-        double speech = stod(value);
-        getline(ss, value, ',');
-        double acoustic = stod(value);
-        getline(ss, value, ',');
-        double instrumental = stod(value);
-        getline(ss, value, ',');
-        getline(ss, value, ',');
-        double valence = stod(value);
-        getline(ss, value, ',');
-        double tempo = stod(value);
+        try
+        {
+            vector<string> fields = parseCSVLine(line);
+            if (fields.size() < 20)
+                continue;
 
-        // Squared differences for standard deviation calculation
-        sumDance += pow(dance - avg.dance, 2);
-        sumEnergy += pow(energy - avg.energy, 2);
-        sumValence += pow(valence - avg.valence, 2);
-        sumTempo += pow(tempo - avg.tempo, 2);
-        sumAcoustic += pow(acoustic - avg.acousticness, 2);
-        sumInstrumental += pow(instrumental - avg.instrumentalness, 2);
-        sumSpeech += pow(speech - avg.speechiness, 2);
-        sumLoud += pow(loud - avg.loudness, 2);
+            // Parse each field with validation
+            double dance = fields[8].empty() ? 0.0 : stod(fields[8]);
+            double energy = fields[9].empty() ? 0.0 : stod(fields[9]);
+            double loud = fields[11].empty() ? 0.0 : stod(fields[11]);
+            double speech = fields[13].empty() ? 0.0 : stod(fields[13]);
+            double acoustic = fields[14].empty() ? 0.0 : stod(fields[14]);
+            double instrumental = fields[15].empty() ? 0.0 : stod(fields[15]);
+            double valence = fields[17].empty() ? 0.0 : stod(fields[17]);
+            double tempo = fields[18].empty() ? 0.0 : stod(fields[18]);
 
-        count++;
+            sumDance += pow(dance - avg.dance, 2);
+            sumEnergy += pow(energy - avg.energy, 2);
+            sumValence += pow(valence - avg.valence, 2);
+            sumTempo += pow(tempo - avg.tempo, 2);
+            sumAcoustic += pow(acoustic - avg.acousticness, 2);
+            sumInstrumental += pow(instrumental - avg.instrumentalness, 2);
+            sumSpeech += pow(speech - avg.speechiness, 2);
+            sumLoud += pow(loud - avg.loudness, 2);
+
+            count++;
+        }
+        catch (const exception &e)
+        {
+            continue;
+        }
+    }
+
+    if (count == 0)
+    {
+        throw runtime_error("No valid data found in tracks.csv");
     }
 
     StdDevs sd{};
@@ -294,33 +324,6 @@ AttributeRange makeRanges(const Averages &avg, const StdDevs &sd, float k = 0.5f
 }
 
 // to help parse CSV line
-vector<string> parseCSVLine(const string &line)
-{
-    vector<string> fields;
-    stringstream ss(line);
-    string field;
-    bool inQuotes = false;
-
-    for (size_t i = 0; i < line.length(); i++)
-    {
-        char c = line[i];
-        if (c == '"')
-        {
-            inQuotes = !inQuotes;
-        }
-        else if (c == ',' && !inQuotes)
-        {
-            fields.push_back(field);
-            field.clear();
-        }
-        else
-        {
-            field += c;
-        }
-    }
-    fields.push_back(field);
-    return fields;
-}
 
 int main(int argc, char *argv[])
 {
@@ -360,33 +363,42 @@ int main(int argc, char *argv[])
         string line;
         while (getline(file, line))
         {
-            // parse line using helper function
-            vector<string> fields = parseCSVLine(line);
-            if (fields.size() < 20)
-                continue; // ensure all data
+            if (line.empty())
+                continue;
 
-            TreeNode *node = new TreeNode(
-                fields[1],        // name
-                fields[2],        // id
-                stoi(fields[2]),  // popularity
-                stoi(fields[3]),  // duration
-                stoi(fields[4]),  // explicit
-                {},               // artists
-                fields[7],        // release date
-                stof(fields[8]),  // danceability
-                stof(fields[9]),  // energy
-                stoi(fields[10]), // key
-                stof(fields[11]), // loudness
-                stoi(fields[12]), // mode
-                stof(fields[13]), // speechiness
-                stof(fields[14]), // acousticness
-                stof(fields[15]), // instrumentalness
-                stof(fields[16]), // liveness
-                stof(fields[17]), // valence
-                stof(fields[18]), // tempo
-                stoi(fields[19])  // time signature
-            );
-            tree.insert(node);
+            try
+            {
+                vector<string> fields = parseCSVLine(line);
+                if (fields.size() < 20)
+                    continue;
+
+                TreeNode *node = new TreeNode(
+                    fields[1],                                    // name
+                    fields[0],                                    // id
+                    fields[2].empty() ? 0 : stoi(fields[2]),      // popularity
+                    fields[3].empty() ? 0 : stoi(fields[3]),      // duration
+                    fields[4].empty() ? 0 : stoi(fields[4]),      // explicit
+                    {},                                           // artists
+                    fields[7],                                    // release date
+                    fields[8].empty() ? 0.0f : stof(fields[8]),   // danceability
+                    fields[9].empty() ? 0.0f : stof(fields[9]),   // energy
+                    fields[10].empty() ? 0 : stoi(fields[10]),    // key
+                    fields[11].empty() ? 0.0f : stof(fields[11]), // loudness
+                    fields[12].empty() ? 0 : stoi(fields[12]),    // mode
+                    fields[13].empty() ? 0.0f : stof(fields[13]), // speechiness
+                    fields[14].empty() ? 0.0f : stof(fields[14]), // acousticness
+                    fields[15].empty() ? 0.0f : stof(fields[15]), // instrumentalness
+                    fields[16].empty() ? 0.0f : stof(fields[16]), // liveness
+                    fields[17].empty() ? 0.0f : stof(fields[17]), // valence
+                    fields[18].empty() ? 0.0f : stof(fields[18]), // tempo
+                    fields[19].empty() ? 4 : stoi(fields[19])     // time signature
+                );
+                tree.insert(node);
+            }
+            catch (const exception &e)
+            {
+                continue;
+            }
         }
         file.close();
 
@@ -425,5 +437,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-// tree.cpp
