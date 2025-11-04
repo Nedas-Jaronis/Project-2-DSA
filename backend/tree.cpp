@@ -47,14 +47,31 @@ public:
 class BinaryTree {
 private:
     TreeNode* root;
-    void dfsHelper(TreeNode* node, vector<TreeNode*>& result){
-        if (!node) return;
-        dfsHelper(node->left, result);
-        result.push_back(node);
-        dfsHelper(node->right, result);
+
+    bool inRange(TreeNode* node, const AttributeRange& r) {
+    return (
+        node->danceability >= r.minDance && node->danceability <= r.maxDance &&
+        node->energy >= r.minEnergy && node->energy <= r.maxEnergy &&
+        node->valence >= r.minValence && node->valence <= r.maxValence &&
+        node->tempo >= r.minTempo && node->tempo <= r.maxTempo &&
+        node->acousticness >= r.minAcousticness && node->acousticness <= r.maxAcousticness &&
+        node->instrumentalness >= r.minInstrumentalness && node->instrumentalness <= r.maxInstrumentalness &&
+        node->speechiness >= r.minSpeechiness && node->speechiness <= r.maxSpeechiness &&
+        node->loudness >= r.minLoudness && node->loudness <= r.maxLoudness
+        );
     }
+
+    void dfsHelper(TreeNode* node, const AttributeRange& r, vector<TreeNode*>& result){
+        if (!node) return;
+        dfsHelper(node->left, r, result);
+        if(inRange(node,r)) result.push_back(node);
+        dfsHelper(node->right, r, result);
+    }
+
 public:
+
     BinaryTree() : root(nullptr) {}
+
     void insert(TreeNode* newNode){
         if (!root){ root = newNode; return; }
         TreeNode* curr = root;
@@ -62,14 +79,25 @@ public:
         while (curr) { parent = curr; curr = (newNode->name < curr->name) ? curr->left : curr->right; }
         if (newNode->name < parent->name) parent->left = newNode; else parent->right = newNode;
     }
-    vector<TreeNode*> dfs() { vector<TreeNode*> result; dfsHelper(root, result); return result; }
-    vector<TreeNode*> bfs() {
+
+    vector<TreeNode*> dfs(const AttributeRange& r) { 
+        vector<TreeNode*> result; 
+        dfsHelper(root, r, result); 
+        return result; 
+    }
+    
+    vector<TreeNode*> bfs(const AttributeRange& r) {
         vector<TreeNode*> result;
         if (!root) return result;
-        queue<TreeNode*> q; q.push(root);
+
+        queue<TreeNode*> q; 
+        q.push(root);
+
         while (!q.empty()) {
             TreeNode* node = q.front(); q.pop();
-            result.push_back(node);
+
+            if(inRange(node, r)) result.push_back(node);
+
             if (node->left) q.push(node->left);
             if (node->right) q.push(node->right);
         }
@@ -83,127 +111,124 @@ struct AttributeRange {
     float minEnergy, maxEnergy;
     float minValence, maxValence;
     float minTempo, maxTempo;
-    float minPopularity, maxPopularity;
+    float minPopularity, maxPopularity; //not used in chart
     float minLoudness, maxLoudness;
     float minAcousticness, maxAcousticness;
     float minInstrumentalness, maxInstrumentalness;
     float minSpeechiness, maxSpeechiness;
-    float minLiveness, maxLiveness;
+    float minLiveness, maxLiveness; //not used in chart
 };
 
-// Parse CSV line
-vector<string> parseCSVLine(const string& line) {
-    vector<string> tokens;
-    string token;
-    bool inQuotes = false;
-    for (char c : line) {
-        if (c == '"') inQuotes = !inQuotes;
-        else if (c == ',' && !inQuotes) { tokens.push_back(token); token.clear(); }
-        else token += c;
-    }
-    tokens.push_back(token);
-    return tokens;
-}
+//Averages for relevant data members
+struct Averages {
+    float dance, energy, valence, tempo;
+    float acousticness, instrumentalness, speechiness, loudness;
+};
 
-// Load songs into tree
-void loadSongs(const string& filePath, BinaryTree& tree) {
-    ifstream file(filePath);
-    if (!file.is_open()) { cerr << "Cannot open file\n"; return; }
-    string line; getline(file, line); // skip header
-    while (getline(file, line)) {
-        vector<string> fields = parseCSVLine(line);
-        if (fields.size() < 20) continue;
-        string name = fields[1];
-        string id = fields[0];
-        int popularity = stoi(fields[2]);
-        int duration_ms = stoi(fields[3]);
-        int isExplicit = stoi(fields[4]);
-        string artistsRaw = fields[5];
-        string releaseDate = fields[7];
-        float danceability = stof(fields[8]);
-        float energy = stof(fields[9]);
-        int key = stoi(fields[10]);
-        float loudness = stof(fields[11]);
-        int mode = stoi(fields[12]);
-        float speechiness = stof(fields[13]);
-        float acousticness = stof(fields[14]);
-        float instrumentalness = stof(fields[15]);
-        float liveness = stof(fields[16]);
-        float valence = stof(fields[17]);
-        float tempo = stof(fields[18]);
-        int time_signature = stoi(fields[19]);
-        // parse artists
-        artistsRaw.erase(remove(artistsRaw.begin(), artistsRaw.end(), '['), artistsRaw.end());
-        artistsRaw.erase(remove(artistsRaw.begin(), artistsRaw.end(), ']'), artistsRaw.end());
-        artistsRaw.erase(remove(artistsRaw.begin(), artistsRaw.end(), '\''), artistsRaw.end());
-        vector<string> artists; stringstream ss(artistsRaw); string a;
-        while (getline(ss,a,',')){ a.erase(0,a.find_first_not_of(" \t")); a.erase(a.find_last_not_of(" \t")+1); if(!a.empty()) artists.push_back(a); }
-        TreeNode* node = new TreeNode(name,id,popularity,duration_ms,isExplicit,artists,releaseDate,
-                                      danceability,energy,key,loudness,mode,speechiness,acousticness,
-                                      instrumentalness,liveness,valence,tempo,time_signature);
-        tree.insert(node);
-    }
-}
+//Standard Deviations for relevant data members
+struct StdDevs {
+    float dance, energy, valence, tempo;
+    float acousticness, instrumentalness, speechiness, loudness;
+};
 
-// Load averages CSV for range
-AttributeRange loadRangesCSV(const string& filePath) {
-    ifstream file(filePath);
-    AttributeRange range{};
-    if (!file.is_open()) { cerr << "Cannot open averages CSV\n"; return range; }
+//Retrieves average data from file
+Averages getAverages(const string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) throw runtime_error("Failed to open averages.csv");
+
+    Averages avg{};
     string header, line;
-    getline(file, header);
-    if (!getline(file, line)) return range;
-    vector<string> fields = parseCSVLine(line);
-    float delta = 0.1;
-    range.minDance = stof(fields[0])-delta; range.maxDance = stof(fields[0])+delta;
-    range.minEnergy = stof(fields[1])-delta; range.maxEnergy = stof(fields[1])+delta;
-    range.minValence = stof(fields[2])-delta; range.maxValence = stof(fields[2])+delta;
-    range.minTempo = stof(fields[3])-5; range.maxTempo = stof(fields[3])+5;
-    range.minPopularity = stof(fields[4])-10; range.maxPopularity = stof(fields[4])+10;
-    range.minLoudness = stof(fields[5])-2; range.maxLoudness = stof(fields[5])+2;
-    range.minAcousticness = stof(fields[6])-0.05; range.maxAcousticness = stof(fields[6])+0.05;
-    range.minInstrumentalness = stof(fields[7])-0.05; range.maxInstrumentalness = stof(fields[7])+0.05;
-    range.minSpeechiness = stof(fields[8])-0.02; range.maxSpeechiness = stof(fields[8])+0.02;
-    range.minLiveness = stof(fields[9])-0.05; range.maxLiveness = stof(fields[9])+0.05;
-    return range;
+    getline(file, header); //header to ignore
+    getline(file, line); //contains data
+
+    stringstream ss(line);
+    string value;
+
+    //find each of the values ; skip popularity and liveness bc not on graph, 5 10
+    getline(ss, value, ','); avg.dance = stof(value);
+    getline(ss, value, ','); avg.energy = stof(value);
+    getline(ss, value, ','); avg.valence = stof(value);
+    getline(ss, value, ','); avg.valence = stof(value);
+    getline(ss, value, ',');
+    getline(ss, value, ','); avg.loudness = stof(value);
+    getline(ss, value, ','); avg.acousticness = stof(value);
+    getline(ss, value, ','); avg.instrumentalness = stof(value);
+    getline(ss, value, ','); avg.speechiness = stof(value);
+
+    return avg;
 }
 
-// Check if song is within range
-bool inRange(TreeNode* node, const AttributeRange& range) {
-    return node->danceability >= range.minDance && node->danceability <= range.maxDance &&
-           node->energy >= range.minEnergy && node->energy <= range.maxEnergy &&
-           node->valence >= range.minValence && node->valence <= range.maxValence &&
-           node->tempo >= range.minTempo && node->tempo <= range.maxTempo &&
-           node->popularity >= range.minPopularity && node->popularity <= range.maxPopularity &&
-           node->loudness >= range.minLoudness && node->loudness <= range.maxLoudness &&
-           node->acousticness >= range.minAcousticness && node->acousticness <= range.maxAcousticness &&
-           node->instrumentalness >= range.minInstrumentalness && node->instrumentalness <= range.maxInstrumentalness &&
-           node->speechiness >= range.minSpeechiness && node->speechiness <= range.maxSpeechiness &&
-           node->liveness >= range.minLiveness && node->liveness <= range.maxLiveness;
+//Calculates standard deviation from data in file
+StdDevs getStandardDevs(const string& filename, const Averages& avg) {
+    ifstream file(filename);
+    if (!file.is_open()) throw runtime_error("Failed to open tracks.csv");
+
+    string header, line;
+    getline(file, header); //ignore
+    
+    int count = 0;
+    double sumDance = 0, sumEnergy = 0, sumValence = 0, sumTempo = 0, sumAcoustic = 0, sumInstrumental = 0, sumSpeech = 0, sumLoud = 0;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string value;
+
+        for (int i = 0; i < 8; i++) getline(ss, value, ',');
+        getline(ss, value, ','); double dance = stod(value);
+        getline(ss, value, ','); double energy = stod(value);
+        getline(ss, value, ',');
+        getline(ss, value, ','); double loud = stod(value);
+        getline(ss, value, ',');
+        getline(ss, value, ','); double speech = stod(value);
+        getline(ss, value, ','); double acoustic = stod(value);
+        getline(ss, value, ','); double instrumental = stod(value);
+        getline(ss, value, ',');
+        getline(ss, value, ','); double valence = stod(value);
+        getline(ss, value, ','); double tempo = stod(value);
+
+        sumDance += pow(dance - avg.dance, 2);
+        sumEnergy += pow(energy - avg.energy, 2);
+        sumValence += pow(valence - avg.valence, 2);
+        sumTempo += pow(tempo - avg.tempo, 2);
+        sumAcoustic += pow(acoustic - avg.acousticness, 2);
+        sumInstrumental += pow(instrumental - avg.instrumentalness, 2);
+        sumSpeech += pow(speech - avg.speechiness, 2);
+        sumLoud += pow(loud - avg.loudness, 2);
+
+        count++;
+    }
+
+    StdDevs sd{};
+    sd.dance = sqrt(sumDance / count);
+    sd.energy = sqrt(sumEnergy / count);
+    sd.valence = sqrt(sumValence / count);
+    sd.tempo = sqrt(sumTempo / count);
+    sd.acousticness = sqrt(sumAcoustic / count);
+    sd.instrumentalness = sqrt(sumInstrumental / count);
+    sd.speechiness = sqrt(sumSpeech / count);
+    sd.loudness = sqrt(sumLoud / count);
 }
 
-// Filter songs
-vector<TreeNode*> filterSongs(const vector<TreeNode*>& songs, const AttributeRange& range) {
-    vector<TreeNode*> result;
-    for (TreeNode* node : songs) if (inRange(node, range)) result.push_back(node);
-    return result;
-}
+//calculates upper and lower bounds for ranges of data
+AttributeRange makeRanges(const Averages& avg, const StdDevs& sd, float k = 0.5f) {
+    AttributeRange r;
 
-int main() {
-    BinaryTree tree;
-    string csvPath = "data/tracks.csv";
-    string averagesCSV = "data/averages.csv";
+    r.minDance = avg.dance - k * sd.dance;
+    r.maxDance = avg.dance + k * sd.dance;
+    r.minEnergy = avg.energy - k * sd.energy;
+    r.maxEnergy = avg.energy + k * sd.energy;
+    r.minValence = avg.valence - k * sd.valence;
+    r.maxValence = avg.valence + k * sd.valence;
+    r.minLoudness = avg.loudness - k * sd.loudness;
+    r.maxLoudness = avg.loudness + k * sd.loudness;
+    r.minTempo = avg.tempo - k * sd.tempo;
+    r.maxTempo = avg.tempo + k * sd.tempo;
+    r.minAcousticness = avg.acousticness - k * sd.acousticness;
+    r.maxAcousticness = avg.acousticness + k * sd.acousticness;
+    r.minInstrumentalness = avg.instrumentalness - k * sd.instrumentalness;
+    r.maxInstrumentalness = avg.instrumentalness + k * sd.instrumentalness;
+    r.minSpeechiness = avg.speechiness - k * sd.speechiness;
+    r.maxSpeechiness = avg.speechiness + k * sd.speechiness;
 
-    loadSongs(csvPath, tree);
-    AttributeRange range = loadRangesCSV(averagesCSV);
-
-    vector<TreeNode*> dfsSongs = filterSongs(tree.dfs(), range);
-    vector<TreeNode*> bfsSongs = filterSongs(tree.bfs(), range);
-
-    cout << "Songs in DFS within range: " << dfsSongs.size() << "\n";
-    cout << "Songs in BFS within range: " << bfsSongs.size() << "\n";
-
-    for (int i=0; i<min(10,(int)dfsSongs.size()); i++) cout << dfsSongs[i]->name << "\n";
-
-    return 0;
+    return r;
 }
