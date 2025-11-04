@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import SkillRadar from './skillRadarChart';
 
@@ -32,8 +32,10 @@ function App() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState('');
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendations, setRecommendations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
 
   // Toggle song selection
   const handleToggleSong = (song: string) => {
@@ -53,39 +55,70 @@ function App() {
 
   // Fetch recommendations when songs change or algorithm changes
   useEffect(() => {
+
+    if (!activeButton) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      setRecommendations([]);
+      setIsLoading(false);
+      return;
+    }
+
   if (addedSongs.length > 0 && activeButton) {
     fetchRecommendations();
   } else {
     setRecommendations([]);
   }
+   return () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  };
 }, [activeButton, addedSongs]);
 
 const fetchRecommendations = async () => {
+  if(abortControllerRef.current){
+    abortControllerRef.current.abort();
+  }
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
+
   setIsLoading(true);
   try {
-    const response = await fetch(`http://localhost:5000/api/recommendations?type=${activeButton}&k=0.5`);
-    
+    const response = await fetch(
+      `http://localhost:5000/api/recommendations?type=${activeButton}&k=0.5`,
+      { signal: controller.signal }
+    );
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    let data = await response.json();
-    
-    // Filter out empty names and limit to 10
-    const filteredRecommendations = (data.recommendations || [])
-      .filter((song: string) => song && song.trim() !== '')
-      .filter((song: string) => !addedSongs.includes(song))
-      .slice(0, 10);
 
-    
+    // Explicitly type the expected JSON structure
+    const data = (await response.json()) as { recommendations?: string[] };
+
+    // Ensure recommendations is a string[]
+    const recs = data.recommendations ?? [];
+
+    // Filter, dedupe, and slice
+    const filteredRecommendations: string[] = Array.from(
+      new Set(
+        recs
+          .filter((song) => song && song.trim() !== "")
+          .filter((song) => !addedSongs.includes(song))
+      )
+    ).slice(0, 10);
+
     setRecommendations(filteredRecommendations);
   } catch (error) {
-    console.error('Error fetching recommendations:', error);
+    console.error("Error fetching recommendations:", error);
     setRecommendations([]);
   } finally {
     setIsLoading(false);
   }
 };
+
 
 
   // Delete selected songs
