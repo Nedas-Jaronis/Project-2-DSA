@@ -1,6 +1,45 @@
-1. run the dataExtraction.py file to extract the csv (data of spotify) files necessary to run the program that are too large to upload to github
-2. cd into backend folder 
-3. compile tree.cpp into an executable ("g++ tree.cpp -o tree")
-4. run "node server.js" to run the backend
-5. in a new terminal, run "npm run dev" to run the frontend
-6. input your songs and get your recommendations!
+### Spotify Song Recommendation Algorithm
+A sophisticated song recommendation system that uses BFS and DFS algorithms to find personalized song suggestions from a dataset of 600,000+ Spotify tracks.
+
+## Overview
+This program analyzes your music preferences by calculating statistical data from your inputted playlist and uses tree traversal algorithms to recommend similar songs. The application features:
+* Interactive UI with dynamic search and playlist management
+* Real-time visualization of song statistics via a polar chart
+* Dual algorithm suppport (BFS and DFS) for recommendation generation
+* Large-scale dataset of 600,000 Spotify songs ranging from 1921 - 2020
+* Personalized recommendations based on standard deviation derived calculations
+
+## Getting Started
+
+# Prerequisites
+* Node.js
+* Python
+* npm (comes with Node.js)
+
+# Installation
+1. Clone the repository
+2. extract the spotify dataset
+> python dataExtraction.py
+3. Install dependencies
+> npm install express
+4. Start the backend
+> cd .\backend\
+> node server.js
+5. Start the frontend
+> npm run dev
+6. Open the application by navigating to the localhost URL displayed in your terminal
+
+## Usage
+1. Add Songs: Type your song names into the search bar and press **Enter** to add them to your playlist. If you decide you want to remove a song, simply click the button next to the song in the playlist and select **Delete Selected.**
+2. View Statistics: Watch as the polar chart updates in real-time as you add songs to your playlist, displaying the average statistics.
+3. Get Recommendations: Click either the **BFS** or **DFS** button to generate your recommendations.
+4. Explore Results: View your 10 personalized song recommendations in the right-hand side panel. If you would like to add a recommendation to your playlist, simply click on the recommendation and it will be automatically added.
+
+**Troubleshooting
+If you don't have Node.js installed, you can download it from the official website: https://nodejs.org/en/download
+If you forgot to install dependencies, you can go back and check and run
+> npm install express
+If your dataExtraction.py fails, you can download the dataset directly from Kaggle: https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-19212020-600k-tracks?select=tracks.csv
+If you do this, make sure to place the tracks.csv file in your \backend\data\ directory
+An executable is included, but if you need or want to recompile for any reason, you can run:
+> g++ tree.cpp -o tree
