@@ -1,6 +1,8 @@
 ### Spotify Song Recommendation Algorithm
 A sophisticated song recommendation system that uses BFS and DFS algorithms to find personalized song suggestions from a dataset of 600,000+ Spotify tracks.
 
+![alt text](https://github.com/Nedas-Jaronis/Project-2-DSA/blob/main/songUIscreenshot.png?raw=true)
+
 ## Overview
 This program analyzes your music preferences by calculating statistical data from your inputted playlist and uses tree traversal algorithms to recommend similar songs. The application features:
 * Interactive UI with dynamic search and playlist management
