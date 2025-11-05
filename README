@@ -1,4 +1,6 @@
 1. run the dataExtraction.py file to extract the csv (data of spotify) files necessary to run the program that are too large to upload to github
-2. cd into backend folder and run "node server.js" to run the backend
-3. in a new terminal, run "npm run dev" to run the frontend
-4. input your songs and get your recommendations!
+2. cd into backend folder 
+3. compile tree.cpp into an executable ("g++ tree.cpp -o tree")
+4. run "node server.js" to run the backend
+5. in a new terminal, run "npm run dev" to run the frontend
+6. input your songs and get your recommendations!
