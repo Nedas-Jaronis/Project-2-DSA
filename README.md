@@ -1,9 +1,9 @@
-### Spotify Song Recommendation Algorithm
+# Spotify Song Recommendation Algorithm
 A sophisticated song recommendation system that uses BFS and DFS algorithms to find personalized song suggestions from a dataset of 600,000+ Spotify tracks.
 
 ![alt text](https://github.com/Nedas-Jaronis/Project-2-DSA/blob/main/songUIscreenshot.png?raw=true)
 
-## Overview
+# Overview
 This program analyzes your music preferences by calculating statistical data from your inputted playlist and uses tree traversal algorithms to recommend similar songs. The application features:
 * Interactive UI with dynamic search and playlist management
 * Real-time visualization of song statistics via a polar chart
@@ -11,14 +11,14 @@ This program analyzes your music preferences by calculating statistical data fro
 * Large-scale dataset of 600,000 Spotify songs ranging from 1921 - 2020
 * Personalized recommendations based on standard deviation derived calculations
 
-## Getting Started
+# Getting Started
 
 # Prerequisites
 * Node.js
 * Python
 * npm (comes with Node.js)
 
-# Installation
+## Installation
 1. Clone the repository
 2. extract the spotify dataset
 > python dataExtraction.py
@@ -37,11 +37,14 @@ This program analyzes your music preferences by calculating statistical data fro
 3. Get Recommendations: Click either the **BFS** or **DFS** button to generate your recommendations.
 4. Explore Results: View your 10 personalized song recommendations in the right-hand side panel. If you would like to add a recommendation to your playlist, simply click on the recommendation and it will be automatically added.
 
-**Troubleshooting
+## Troubleshooting
 If you don't have Node.js installed, you can download it from the official website: https://nodejs.org/en/download
 If you forgot to install dependencies, you can go back and check and run
 > npm install express
+
 If your dataExtraction.py fails, you can download the dataset directly from Kaggle: https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-19212020-600k-tracks?select=tracks.csv
+
 If you do this, make sure to place the tracks.csv file in your \backend\data\ directory
+
 An executable is included, but if you need or want to recompile for any reason, you can run:
 > g++ tree.cpp -o tree
