@@ -22,6 +22,7 @@ struct AttributeRange
     float minLiveness, maxLiveness; // not used in chart
 };
 
+// Tree node representing a song
 class TreeNode
 {
 public:
@@ -61,6 +62,7 @@ public:
           left(nullptr), right(nullptr) {}
 };
 
+// Binary tree for storing and searching songs
 class BinaryTree
 {
 private:
@@ -201,6 +203,7 @@ Averages getAverages(const string &filename)
     return avg;
 }
 
+// Parses a CSV line into fields, handling quoted commas
 vector<string> parseCSVLine(const string &line)
 {
     vector<string> fields;
@@ -228,6 +231,7 @@ vector<string> parseCSVLine(const string &line)
     fields.push_back(field);
     return fields;
 }
+
 // Calculates standard deviation from data in file
 StdDevs getStandardDevs(const string &filename, const Averages &avg)
 {
@@ -323,7 +327,6 @@ AttributeRange makeRanges(const Averages &avg, const StdDevs &sd, float k = 0.5f
     return r;
 }
 
-// to help parse CSV line
 
 int main(int argc, char *argv[])
 {
